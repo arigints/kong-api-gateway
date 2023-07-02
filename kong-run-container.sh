@@ -1,6 +1,6 @@
 #!/bin/bash
 chmod 775 ./kong-run-container.sh
-docker run --rm --name kong \
+docker run --rm --name kong -d \
 --network=kong-net \
 -e "KONG_LOG_LEVEL=debug" \
 -e "KONG_DATABASE=postgres" \

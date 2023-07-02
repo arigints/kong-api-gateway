@@ -1,7 +1,7 @@
 #!/bin/bash
 docker network create kong-net
 chmod 775 ./postgress-run-container.sh
-docker run --rm --name kong-database \
+docker run --rm --name kong-database -d \
 --network=kong-net \
 -v "${PWD}/postgres/data:/var/lib/postgresql/data" \
 -e "POSTGRES_USER=user" \

@@ -1,6 +1,6 @@
 #!/bin/bash
-chmod 775 ./migration_bootstrap.sh
-docker run --rm \
+chmod 775 ./migration-bootstrap.sh
+docker run --rm -d \
 --network=kong-net \
 -e "KONG_DATABASE=postgres" \
 -e "KONG_PG_HOST=kong-database" \
