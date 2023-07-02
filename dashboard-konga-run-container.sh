@@ -1,6 +1,6 @@
 #!/bin/bash
 chmod 775 ./dashboard-konga-run-container.sh
-docker run -d --rm --name konga \
+docker run -d --name konga \
 --network=kong-net \
 -p 1337:1337 \
 -e "DB_ADAPTER=postgres" \
