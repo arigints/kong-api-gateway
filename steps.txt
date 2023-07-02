@@ -1,0 +1,5 @@
+1. Run postgress database => postgress-run-container.sh
+2. Database migration => migration-bootstrap.sh
+3. Run kong => kong-run-container.sh
+4. Kong migration => migration-kong.sh
+5. Run konga dashboard => dashboard-konga-run-container.sh
