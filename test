@@ -1,0 +1,110 @@
+docker run -d --name kong-database --network=kong-net -p 5432:5432 -e “POSTGRES_USER=user” -e "POSTGRES_PASSWORD=12345" -e “POSTGRES_DB=kong” postgres:9.6
+
+docker run -d --name konga \
+--network=kong-net \
+-p 1337:1337 \
+-e "DB_ADAPTER=postgres" \
+-e "DB_HOST=kong-database" \
+-e "DB_USER=user" \
+-e "DB_PASSWORD=12345" \
+-e "DB_DATABASE=konga_db" \
+-e "TOKEN_SECRET=km1GUr4RkcQD7DewhJPNXrCuZwcKmqjb" \
+-e "KONGA_HOOK_TIMEOUT=120000" \
+-e "NODE_ENV=production" \
+pantsel/konga:next
+
+docker run -d --name kong-database \
+--network=kong-net \
+-v "${PWD}/postgres/data:/var/lib/postgresql/data" \
+-e "POSTGRES_USER=user" \
+-e "POSTGRES_PASSWORD=12345" \
+-e "POSTGRES_DB=kong_db" \
+-p 5432:5432 \
+postgres:9.6
+
+docker run --rm \
+--network=kong-net \
+-e "KONG_DATABASE=postgres" \
+-e "KONG_PG_HOST=kong-database" \
+-e "KONG_PG_DATABASE=kong_db" \
+-e "KONG_PG_USER=user" \
+-e "KONG_PG_PASSWORD=12345" \
+-e "KONG_CASSANDRA_CONTACT_POINTS=kong-database" \
+kong:2.1.3 kong migrations bootstrap
+
+docker run -d --name kong \
+--network=kong-net \
+-e "KONG_LOG_LEVEL=debug" \
+-e "KONG_DATABASE=postgres" \
+-e "KONG_PG_HOST=kong-database" \
+-e "KONG_PG_DATABASE=kong_db" \
+-e "KONG_CASSANDRA_CONTACT_POINTS=kong-database" \
+-e "KONG_PG_USER=user" \
+-e "KONG_PG_PASSWORD=12345" \
+-e "KONG_PROXY_ACCESS_LOG=/dev/stdout" \
+-e "KONG_ADMIN_ACCESS_LOG=/dev/stdout" \
+-e "KONG_PROXY_ERROR_LOG=/dev/stderr" \
+-e "KONG_ADMIN_ERROR_LOG=/dev/stderr" \
+-e "KONG_ADMIN_LISTEN=0.0.0.0:8001" \
+-e "KONG_PROXY_LISTEN=0.0.0.0:8000" \
+-e "KONG_PROXY_LISTEN_SSL=0.0.0.0:8443" \
+-p 8000:8000 \
+-p 8443:8443 \
+-p 8001:8001 \
+-p 8444:8444 \
+kong:2.1.3
+
+docker run --rm --network=kong-net -e "KONG_DATABASE=postgres" -e "KONG_PG_HOST=kong-database" -e "KONG_PG_PASSWORD=12345" -e "KONG_PASSWORD=test" -e "KONG_PG_USER=user" -e "KONG_CASSANDRA_CONTACT_POINTS=kong-database" kong/kong-gateway:3.3.0.0 kong_db migrations bootstrap
+
+docker run -d --name kong-database \
+--network=kong-net \
+-v "${PWD}/postgres/data:/var/lib/postgresql/data" \
+-e "POSTGRES_USER=user" \
+-e "POSTGRES_PASSWORD=12345" \
+-e "POSTGRES_DB=kong_db" \
+-p 5432:5432 \
+postgres:9.6
+
+docker run -d --name kong \
+--network=kong-net \
+-e "KONG_LOG_LEVEL=debug" \
+-e "KONG_DATABASE=postgres" \
+-e "KONG_PG_HOST=kong-database" \
+-e "KONG_PG_DATABASE=kong_db" \
+-e "KONG_CASSANDRA_CONTACT_POINTS=kong-database" \
+-e "KONG_PG_USER=user" \
+-e "KONG_PG_PASSWORD=12345" \
+-e "KONG_PROXY_ACCESS_LOG=/dev/stdout" \
+-e "KONG_ADMIN_ACCESS_LOG=/dev/stdout" \
+-e "KONG_PROXY_ERROR_LOG=/dev/stderr" \
+-e "KONG_ADMIN_ERROR_LOG=/dev/stderr" \
+-e "KONG_ADMIN_LISTEN=0.0.0.0:8001" \
+-e "KONG_PROXY_LISTEN=0.0.0.0:8000" \
+-e "KONG_PROXY_LISTEN_SSL=0.0.0.0:8443" \
+-p 8000:8000 \
+-p 8443:8443 \
+-p 8001:8001 \
+-p 8444:8444 \
+kong:2.8.3-alpine
+
+docker run -d --name kong-dbless \
+ --network=kong-net \
+ -v "$HOME/kong:/kong/declarative/" \
+ -e "KONG_DATABASE=off" \
+ -e "KONG_DECLARATIVE_CONFIG=/kong/declarative/kong.yml" \
+ -e "KONG_PROXY_ACCESS_LOG=/dev/stdout" \
+ -e "KONG_ADMIN_ACCESS_LOG=/dev/stdout" \
+ -e "KONG_PROXY_ERROR_LOG=/dev/stderr" \
+ -e "KONG_ADMIN_ERROR_LOG=/dev/stderr" \
+ -e "KONG_ADMIN_LISTEN=0.0.0.0:8001" \
+ -e "KONG_ADMIN_GUI_URL=http://localhost:8002" \
+ -e KONG_LICENSE_DATA \
+ -p 8000:8000 \
+ -p 8443:8443 \
+ -p 8001:8001 \
+ -p 8444:8444 \
+ -p 8002:8002 \
+ -p 8445:8445 \
+ -p 8003:8003 \
+ -p 8004:8004 \
+ kong/kong-gateway:3.3.0.0

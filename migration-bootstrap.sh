@@ -8,4 +8,4 @@ docker run -d \
 -e "KONG_PG_USER=user" \
 -e "KONG_PG_PASSWORD=12345" \
 -e "KONG_CASSANDRA_CONTACT_POINTS=kong-database" \
-kong:1.3.0-alpine kong migrations bootstrap
+kong:3.3.0-alpine kong migrations bootstrap
